@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getFBPostImage, fetchWithTimeout, CDN_BASE_URL } from "@/utils/FirebaseUtil";
+import { getPostImage, fetchWithTimeout, CDN_BASE_URL } from "@/utils/PostDataUtil";
 import path from "path";
 
 function isSafeInput(input: string | null): boolean {
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        const result = await getFBPostImage(postType, postID, srcID);
+        const result = await getPostImage(postType, postID, srcID);
         return NextResponse.json(result);
     } catch (error: any) {
         return NextResponse.json({

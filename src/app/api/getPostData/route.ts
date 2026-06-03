@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getFBPostData } from "@/utils/FirebaseUtil";
+import { getPostData } from "@/utils/PostDataUtil";
 
 export async function POST(req: NextRequest) {
     try {
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        const result = await getFBPostData(postType, postID);
+        const result = await getPostData(postType, postID);
         return NextResponse.json(result);
     } catch (error: any) {
         return NextResponse.json({
