@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import SideMenu from "@/app/_component/SideMenu/SideMenu";
 import "./globals.css";
-import { SITE_URL } from "@/utils/FirebaseUtil";
+import { SITE_URL } from "@/utils/PostDataUtil";
 
 const nanumSquareL = localFont({
     src: "../fonts/NanumSquareL.otf",
