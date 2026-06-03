@@ -1,15 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPostData } from "@/utils/PostDataUtil";
 
+function isSafeInput(input: string | null): boolean {
+    if (!input) return false;
+    if (input.includes("/") || input.includes("\\") || input.includes("..")) {
+        return false;
+    }
+    return true;
+}
+
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const { postID, postType } = body;
 
-        if (!postID || !postType) {
+        if (typeof postID !== "string" || typeof postType !== "string") {
             return NextResponse.json({
                 RESULT_CODE: 100,
-                RESULT_MSG: "Missing parameters"
+                RESULT_MSG: "Invalid parameters"
+            });
+        }
+
+        if (!isSafeInput(postID) || !isSafeInput(postType)) {
+            return NextResponse.json({
+                RESULT_CODE: 100,
+                RESULT_MSG: "Invalid parameters"
             });
         }
 
