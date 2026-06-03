@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import PostCard from "@/app/[type]/_component/PostCard/PostCard";
-import { getFBPostList, PostData } from "@/utils/FirebaseUtil";
+import { getPostList, PostData } from "@/utils/PostDataUtil";
 import { redirect } from "next/navigation";
 import PostListLoading from "./loading";
 
@@ -38,7 +38,7 @@ export default async function PostListPage({
 }
 
 async function PostListContent({ type }: { type: string }) {
-    const result = await getFBPostList(type);
+    const result = await getPostList(type);
     const postList: PostData[] = result.RESULT_CODE === 200 ? result.RESULT_DATA.PostList : [];
 
     const pinnedPosts = postList.filter((post) => post.postIsPinned);

@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import MDRender from "../_component/MDRender/MDRender";
 import Utterances from "../_component/Utterances/Utterances";
-import { getFBPostData, SITE_URL } from "@/utils/FirebaseUtil";
+import { getPostData, SITE_URL } from "@/utils/PostDataUtil";
 import { notFound } from "next/navigation";
 import PostDetailLoading from "./loading";
 
@@ -14,7 +14,8 @@ export async function generateMetadata({
     params: Promise<{ type: string; id: string }>;
 }): Promise<Metadata> {
     const { type, id } = await params;
-    const result = await getFBPostData(type, id);
+    const result = await getPostData(type, id);
+
 
     if (result.RESULT_CODE !== 200) {
         return {
@@ -80,7 +81,7 @@ export default async function PostViewPage({
 }
 
 async function PostViewContent({ type, id }: { type: string; id: string }) {
-    const result = await getFBPostData(type, id);
+    const result = await getPostData(type, id);
 
     if (result.RESULT_CODE !== 200) {
         notFound();
