@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import MDRender from "../_component/MDRender/MDRender";
 import Utterances from "../_component/Utterances/Utterances";
-import { getFBPostData, SITE_URL } from "@/utils/FirebaseUtil";
+import { getPostData, SITE_URL } from "@/utils/PostDataUtil";
 import { notFound } from "next/navigation";
 import PostDetailLoading from "./loading";
 
@@ -14,7 +14,8 @@ export async function generateMetadata({
     params: Promise<{ type: string; id: string }>;
 }): Promise<Metadata> {
     const { type, id } = await params;
-    const result = await getFBPostData(type, id);
+    const result = await getPostData(type, id);
+
 
     if (result.RESULT_CODE !== 200) {
         return {
@@ -22,7 +23,7 @@ export async function generateMetadata({
         };
     }
 
-    const { PostTitle, PostTag } = result.RESULT_DATA;
+    const { PostTitle, PostTag, PostURL } = result.RESULT_DATA;
     const categoryName = getCategoryNameKo(type);
     const tagsString = PostTag && PostTag.length > 0 ? `. 태그: ${PostTag.join(", ")}` : "";
     const description = `Useful의 ${categoryName} 포스팅: ${PostTitle}${tagsString}`;
@@ -36,7 +37,8 @@ export async function generateMetadata({
             imageUrl = "/api/getPostImage?postType=solving&postID=dummy&srcID=thumb_programmers.png";
         }
     } else {
-        imageUrl = `/api/getPostImage?postType=${type}&postID=${id}&srcID=post.png`;
+        const imageFolder = type === "about" ? id : PostURL;
+        imageUrl = `/api/getPostImage?postType=${type}&postID=${imageFolder}&srcID=post.png`;
     }
 
     return {
@@ -80,7 +82,7 @@ export default async function PostViewPage({
 }
 
 async function PostViewContent({ type, id }: { type: string; id: string }) {
-    const result = await getFBPostData(type, id);
+    const result = await getPostData(type, id);
 
     if (result.RESULT_CODE !== 200) {
         notFound();

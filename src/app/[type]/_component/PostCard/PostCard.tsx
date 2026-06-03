@@ -1,6 +1,6 @@
 import React from "react";
 import PostCardDesktop from "@/app/[type]/_component/PostCard/PostCardDesktop";
-import { PostData } from "@/utils/FirebaseUtil";
+import { PostData } from "@/utils/PostDataUtil";
 
 interface PostCardProps {
     post: PostData;

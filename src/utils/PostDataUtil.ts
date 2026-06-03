@@ -1,25 +1,5 @@
-import { FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
-import { collection, doc, Firestore, getDoc, getDocs, getFirestore, orderBy, query } from "firebase/firestore";
 import path from "path";
 import { cache } from "react";
-
-const firebaseConfig = {
-    apiKey: process.env.FB_API_KEY,
-    authDomain: process.env.FB_AUTH_DOMAIN,
-    projectId: process.env.FB_PROJECT_ID,
-    appId: process.env.FB_APP_ID
-};
-
-let firebaseApp: FirebaseApp;
-let firebaseDB: Firestore;
-
-export const initFB = (): Firestore => {
-    if (!firebaseApp) {
-        firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-        firebaseDB = getFirestore(firebaseApp);
-    }
-    return firebaseDB;
-};
 
 export interface PostData {
     postDate: string;
@@ -38,50 +18,15 @@ function isSafeInput(input: string | null): boolean {
     return true;
 }
 
-export const getFBPostList = cache(async (postType: string) => {
-    const db = initFB();
-    const postList: PostData[] = [];
-    const resultData = {
-        RESULT_CODE: 0,
-        RESULT_MSG: "",
-        RESULT_DATA: {
-            PostCount: 0,
-            PostList: postList
+function stripFrontMatter(content: string): string {
+    if (content.startsWith("---")) {
+        const nextSeparatorIdx = content.indexOf("---", 3);
+        if (nextSeparatorIdx !== -1) {
+            return content.slice(nextSeparatorIdx + 3).trimStart();
         }
-    };
-
-    if (!isSafeInput(postType)) {
-        resultData.RESULT_CODE = 100;
-        resultData.RESULT_MSG = "Invalid post type";
-        return resultData;
     }
-
-    try {
-        const postCollectionList = await getDocs(
-            query(collection(db, postType), orderBy("isPinned", "desc"))
-        );
-        postCollectionList.forEach((curData) => {
-            resultData.RESULT_DATA.PostCount++;
-            const postData: PostData = {
-                postDate: curData.get("date") || "",
-                postID: curData.id,
-                postIsPinned: curData.get("isPinned") || false,
-                postTag: curData.get("tag") || [],
-                postTitle: curData.get("title") || "",
-                postURL: curData.get("url") || "",
-            };
-            resultData.RESULT_DATA.PostList.push(postData);
-        });
-
-        resultData.RESULT_CODE = 200;
-        resultData.RESULT_MSG = "Success";
-    } catch (error: any) {
-        resultData.RESULT_CODE = 100;
-        resultData.RESULT_MSG = error.message || String(error);
-    }
-
-    return resultData;
-});
+    return content;
+}
 
 export const CDN_BASE_URL = "https://cdn.jsdelivr.net/gh/yymin1022/Blog_LR_Data@master";
 export const SITE_URL = process.env.URL_PUB || "https://dev-lr.com";
@@ -103,8 +48,56 @@ export async function fetchWithTimeout(resource: string, options: RequestInit & 
     }
 }
 
-export const getFBPostData = cache(async (postType: string, postID: string) => {
-    const db = initFB();
+// Fetch posts index mapping category slugs to PostData array
+const fetchPostsIndex = cache(async () => {
+    const url = `${CDN_BASE_URL}/posts.json`;
+    const response = await fetchWithTimeout(url, {
+        next: { revalidate: 60 } // Cache index for 60 seconds
+    });
+    if (!response.ok) {
+        throw new Error(`Failed to fetch posts index (HTTP ${response.status})`);
+    }
+    const data = await response.json();
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+        throw new Error("Invalid posts index structure: expected a JSON object");
+    }
+    return data as Record<string, PostData[]>;
+});
+
+export const getPostList = cache(async (postType: string) => {
+    const postList: PostData[] = [];
+    const resultData = {
+        RESULT_CODE: 0,
+        RESULT_MSG: "",
+        RESULT_DATA: {
+            PostCount: 0,
+            PostList: postList
+        }
+    };
+
+    if (!isSafeInput(postType)) {
+        resultData.RESULT_CODE = 100;
+        resultData.RESULT_MSG = "Invalid post type";
+        return resultData;
+    }
+
+    try {
+        const postsIndex = await fetchPostsIndex();
+        const categoryPosts = postsIndex && Array.isArray(postsIndex[postType]) ? postsIndex[postType] : [];
+        
+        resultData.RESULT_DATA.PostList = categoryPosts;
+        resultData.RESULT_DATA.PostCount = categoryPosts.length;
+        resultData.RESULT_CODE = 200;
+        resultData.RESULT_MSG = "Success";
+    } catch (error: any) {
+        resultData.RESULT_CODE = 100;
+        resultData.RESULT_MSG = error.message || String(error);
+    }
+
+    return resultData;
+});
+
+export const getPostData = cache(async (postType: string, postID: string) => {
     const resultData = {
         RESULT_CODE: 0,
         RESULT_MSG: "",
@@ -125,18 +118,22 @@ export const getFBPostData = cache(async (postType: string, postID: string) => {
     }
 
     try {
-        const postDocData = await getDoc(doc(db, postType, postID));
-        if (!postDocData.exists()) {
+        const postsIndex = await fetchPostsIndex();
+        const categoryPosts = postsIndex && Array.isArray(postsIndex[postType]) ? postsIndex[postType] : [];
+        const post = categoryPosts.find((p) => p.postID === postID);
+
+        if (!post) {
             resultData.RESULT_CODE = 100;
             resultData.RESULT_MSG = "Post not found";
             return resultData;
         }
-        resultData.RESULT_DATA.PostDate = postDocData.data().date || "";
-        resultData.RESULT_DATA.PostIsPinned = postDocData.data().isPinned || false;
-        resultData.RESULT_DATA.PostTag = postDocData.data().tag || [];
-        resultData.RESULT_DATA.PostTitle = postDocData.data().title || "";
 
-        const postURL = postDocData.data().url || "";
+        resultData.RESULT_DATA.PostDate = post.postDate || "";
+        resultData.RESULT_DATA.PostIsPinned = post.postIsPinned || false;
+        resultData.RESULT_DATA.PostTag = post.postTag || [];
+        resultData.RESULT_DATA.PostTitle = post.postTitle || "";
+        
+        const postURL = post.postURL || "";
         resultData.RESULT_DATA.PostURL = postURL;
 
         if (!isSafeInput(postURL)) {
@@ -145,14 +142,16 @@ export const getFBPostData = cache(async (postType: string, postID: string) => {
             return resultData;
         }
 
-        const url = `${CDN_BASE_URL}/${postType}/${postURL}/post.md`;
+        // For 'about' posts, the folder name matches the postID
+        const folderName = postType === "about" ? postID : postURL;
+        const url = `${CDN_BASE_URL}/${postType}/${folderName}/post.md`;
         const response = await fetchWithTimeout(url);
         if (!response.ok) {
             throw new Error(`Failed to fetch post content (HTTP ${response.status})`);
         }
 
-        resultData.RESULT_DATA.PostContent = await response.text();
-
+        const rawContent = await response.text();
+        resultData.RESULT_DATA.PostContent = stripFrontMatter(rawContent);
         resultData.RESULT_CODE = 200;
         resultData.RESULT_MSG = "Success";
     } catch (error: any) {
@@ -163,7 +162,7 @@ export const getFBPostData = cache(async (postType: string, postID: string) => {
     return resultData;
 });
 
-export const getFBPostImage = async (postType: string, postID: string, srcID: string) => {
+export const getPostImage = async (postType: string, postID: string, srcID: string) => {
     const resultData = {
         RESULT_CODE: 0,
         RESULT_MSG: "",
