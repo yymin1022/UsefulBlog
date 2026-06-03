@@ -57,7 +57,11 @@ const fetchPostsIndex = cache(async () => {
     if (!response.ok) {
         throw new Error(`Failed to fetch posts index (HTTP ${response.status})`);
     }
-    return await response.json() as Record<string, PostData[]>;
+    const data = await response.json();
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+        throw new Error("Invalid posts index structure: expected a JSON object");
+    }
+    return data as Record<string, PostData[]>;
 });
 
 export const getPostList = cache(async (postType: string) => {
@@ -79,7 +83,7 @@ export const getPostList = cache(async (postType: string) => {
 
     try {
         const postsIndex = await fetchPostsIndex();
-        const categoryPosts = postsIndex[postType] || [];
+        const categoryPosts = postsIndex && Array.isArray(postsIndex[postType]) ? postsIndex[postType] : [];
         
         resultData.RESULT_DATA.PostList = categoryPosts;
         resultData.RESULT_DATA.PostCount = categoryPosts.length;
@@ -115,7 +119,7 @@ export const getPostData = cache(async (postType: string, postID: string) => {
 
     try {
         const postsIndex = await fetchPostsIndex();
-        const categoryPosts = postsIndex[postType] || [];
+        const categoryPosts = postsIndex && Array.isArray(postsIndex[postType]) ? postsIndex[postType] : [];
         const post = categoryPosts.find((p) => p.postID === postID);
 
         if (!post) {
