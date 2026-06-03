@@ -18,6 +18,16 @@ function isSafeInput(input: string | null): boolean {
     return true;
 }
 
+function stripFrontMatter(content: string): string {
+    if (content.startsWith("---")) {
+        const nextSeparatorIdx = content.indexOf("---", 3);
+        if (nextSeparatorIdx !== -1) {
+            return content.slice(nextSeparatorIdx + 3).trimStart();
+        }
+    }
+    return content;
+}
+
 export const CDN_BASE_URL = "https://cdn.jsdelivr.net/gh/yymin1022/Blog_LR_Data@master";
 export const SITE_URL = process.env.URL_PUB || "https://dev-lr.com";
 
@@ -136,7 +146,8 @@ export const getPostData = cache(async (postType: string, postID: string) => {
             throw new Error(`Failed to fetch post content (HTTP ${response.status})`);
         }
 
-        resultData.RESULT_DATA.PostContent = await response.text();
+        const rawContent = await response.text();
+        resultData.RESULT_DATA.PostContent = stripFrontMatter(rawContent);
         resultData.RESULT_CODE = 200;
         resultData.RESULT_MSG = "Success";
     } catch (error: any) {
