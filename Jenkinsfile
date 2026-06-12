@@ -10,6 +10,13 @@ pipeline {
         DOCKER_IMAGE_NAME = "blog-lr"
         DOCKER_IMAGE_STORAGE = "yymin1022"
         DOCKER_IMAGE_TAG = "release${BUILD_NUMBER}"
+
+        // Firebase Web SDK config variables (Safe to store in git repository as they are public client keys)
+        NEXT_PUBLIC_FB_API_KEY = "AIzaSyCKebijOLtw7y9af0UFBqVIZASF_jGVqME"
+        NEXT_PUBLIC_FB_AUTH_DOMAIN = "blog-lr-b18ce.firebaseapp.com"
+        NEXT_PUBLIC_FB_PROJECT_ID = "blog-lr-b18ce"
+        NEXT_PUBLIC_FB_APP_ID = "1:247226604455:web:8f75d4707096699bbfb482"
+        NEXT_PUBLIC_FB_MEASUREMENT_ID = "G-H95BTWQR7P"
     }
 
     stages {
@@ -22,7 +29,7 @@ pipeline {
                         "--build-arg NEXT_PUBLIC_FB_AUTH_DOMAIN=${env.NEXT_PUBLIC_FB_AUTH_DOMAIN} " +
                         "--build-arg NEXT_PUBLIC_FB_PROJECT_ID=${env.NEXT_PUBLIC_FB_PROJECT_ID} " +
                         "--build-arg NEXT_PUBLIC_FB_APP_ID=${env.NEXT_PUBLIC_FB_APP_ID} " +
-                        "--build-arg NEXT_PUBLIC_FB_MEASUREMENT_ID=${env.NEXT_PUBLIC_FB_MEASUREMENT_ID}"
+                        "--build-arg NEXT_PUBLIC_FB_MEASUREMENT_ID=${env.NEXT_PUBLIC_FB_MEASUREMENT_ID} ."
                     )
                 }
             }
