@@ -10,18 +10,26 @@ export default function FirebaseAnalytics() {
     const searchParams = useSearchParams();
 
     useEffect(() => {
-        if (!analytics) return;
+        const currentAnalytics = analytics;
+        if (!currentAnalytics) return;
 
-        try {
-            const url = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : "");
-            logEvent(analytics, "page_view", {
-                page_path: url,
-                page_location: window.location.href,
-                page_title: document.title,
-            });
-        } catch (error) {
-            console.error("Failed to log page_view event to Firebase Analytics:", error);
-        }
+        // Delay execution to let Next.js update the document title in the DOM
+        const handle = setTimeout(() => {
+            try {
+                const url = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : "");
+                logEvent(currentAnalytics, "page_view", {
+                    page_path: url,
+                    page_location: window.location.href,
+                    page_title: document.title,
+                });
+            } catch (error) {
+                console.error("Failed to log page_view event to Firebase Analytics:", error);
+            }
+        }, 100);
+
+        return () => {
+            clearTimeout(handle);
+        };
     }, [pathname, searchParams]);
 
     return null;
