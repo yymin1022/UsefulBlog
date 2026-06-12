@@ -16,7 +16,14 @@ pipeline {
         stage("Build Docker Image") {
             steps {
                 script {
-                    docker.build("${DOCKER_IMAGE_STORAGE}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}")
+                    docker.build(
+                        "${DOCKER_IMAGE_STORAGE}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}",
+                        "--build-arg NEXT_PUBLIC_FB_API_KEY=${env.NEXT_PUBLIC_FB_API_KEY} " +
+                        "--build-arg NEXT_PUBLIC_FB_AUTH_DOMAIN=${env.NEXT_PUBLIC_FB_AUTH_DOMAIN} " +
+                        "--build-arg NEXT_PUBLIC_FB_PROJECT_ID=${env.NEXT_PUBLIC_FB_PROJECT_ID} " +
+                        "--build-arg NEXT_PUBLIC_FB_APP_ID=${env.NEXT_PUBLIC_FB_APP_ID} " +
+                        "--build-arg NEXT_PUBLIC_FB_MEASUREMENT_ID=${env.NEXT_PUBLIC_FB_MEASUREMENT_ID}"
+                    )
                 }
             }
         }
