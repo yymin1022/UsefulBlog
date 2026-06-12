@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import SideMenu from "@/app/_component/SideMenu/SideMenu";
 import "./globals.css";
 import { SITE_URL } from "@/utils/PostDataUtil";
+import { Suspense } from "react";
+import FirebaseAnalytics from "@/app/_component/FirebaseAnalytics/FirebaseAnalytics";
 
 const nanumSquareL = localFont({
     src: "../fonts/NanumSquareL.otf",
@@ -72,6 +74,9 @@ export default function RootLayout({
             className={`${nanumSquareL.variable} ${nanumSquareR.variable} ${nanumSquareB.variable} ${pretendardL.variable} ${pretendardR.variable} ${pretendardB.variable}`}
         >
             <body>
+                <Suspense fallback={null}>
+                    <FirebaseAnalytics />
+                </Suspense>
                 <div className="w-full flex flex-col lg:flex-row">
                     <SideMenu/>
                     <div className="w-full pt-[65px] lg:pt-0 lg:pl-[400px]">
