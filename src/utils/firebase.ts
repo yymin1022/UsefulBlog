@@ -1,4 +1,4 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
+import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import { getAnalytics, Analytics } from "firebase/analytics";
 
 const firebaseConfig = {
@@ -9,13 +9,21 @@ const firebaseConfig = {
     measurementId: process.env.NEXT_PUBLIC_FB_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-
-// Initialize Analytics (client-side only and if measurementId is provided and not the default placeholder)
+let app: FirebaseApp | null = null;
 let analytics: Analytics | null = null;
-if (typeof window !== "undefined" && firebaseConfig.measurementId && firebaseConfig.measurementId !== "G-XXXXXXXXXX") {
-    analytics = getAnalytics(app);
+
+// Initialize Firebase only on client-side AND when apiKey is present
+if (typeof window !== "undefined" && firebaseConfig.apiKey) {
+    try {
+        app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+        
+        // Initialize Analytics if measurementId is valid and not the placeholder
+        if (firebaseConfig.measurementId && firebaseConfig.measurementId !== "G-XXXXXXXXXX") {
+            analytics = getAnalytics(app);
+        }
+    } catch (error) {
+        console.error("Failed to initialize Firebase:", error);
+    }
 }
 
 export { app, analytics };
