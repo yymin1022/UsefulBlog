@@ -15,15 +15,17 @@ pipeline {
     stages {
         stage("Build Docker Image") {
             steps {
-                script {
-                    docker.build(
-                        "${DOCKER_IMAGE_STORAGE}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}",
-                        "--build-arg NEXT_PUBLIC_FB_API_KEY=${env.NEXT_PUBLIC_FB_API_KEY} " +
-                        "--build-arg NEXT_PUBLIC_FB_AUTH_DOMAIN=${env.NEXT_PUBLIC_FB_AUTH_DOMAIN} " +
-                        "--build-arg NEXT_PUBLIC_FB_PROJECT_ID=${env.NEXT_PUBLIC_FB_PROJECT_ID} " +
-                        "--build-arg NEXT_PUBLIC_FB_APP_ID=${env.NEXT_PUBLIC_FB_APP_ID} " +
-                        "--build-arg NEXT_PUBLIC_FB_MEASUREMENT_ID=${env.NEXT_PUBLIC_FB_MEASUREMENT_ID} ."
-                    )
+                // 이 빌드 단계에서 젠킨스 Credential(Secret File)을 .env.local 파일로 바인딩하여 빌드에 전달합니다.
+                // 자격 증명 ID가 'blog-env-file'이라고 가정하고 작성했습니다. 다를 경우 실제 ID로 수정이 필요합니다.
+                withCredentials([file(credentialsId: 'blog-env-file', variable: 'ENV_FILE')]) {
+                    script {
+                        sh "cp \$ENV_FILE .env.local"
+                        docker.build(
+                            "${DOCKER_IMAGE_STORAGE}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}",
+                            "."
+                        )
+                        sh "rm -f .env.local"
+                    }
                 }
             }
         }
