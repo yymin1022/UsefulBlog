@@ -68,6 +68,15 @@ export default function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    // Read runtime environment variables (injected when the container is created)
+    const firebaseConfig = {
+        apiKey: process.env.FB_API_KEY,
+        authDomain: process.env.FB_AUTH_DOMAIN,
+        projectId: process.env.FB_PROJECT_ID,
+        appId: process.env.FB_APP_ID,
+        measurementId: process.env.FB_MEASUREMENT_ID,
+    };
+
     return (
         <html 
             lang="ko"
@@ -75,7 +84,7 @@ export default function RootLayout({
         >
             <body>
                 <Suspense fallback={null}>
-                    <FirebaseAnalytics />
+                    <FirebaseAnalytics config={firebaseConfig} />
                 </Suspense>
                 <div className="w-full flex flex-col lg:flex-row">
                     <SideMenu/>
