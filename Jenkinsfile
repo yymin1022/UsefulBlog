@@ -22,7 +22,7 @@ pipeline {
                         "--build-arg NEXT_PUBLIC_FB_AUTH_DOMAIN=${env.NEXT_PUBLIC_FB_AUTH_DOMAIN} " +
                         "--build-arg NEXT_PUBLIC_FB_PROJECT_ID=${env.NEXT_PUBLIC_FB_PROJECT_ID} " +
                         "--build-arg NEXT_PUBLIC_FB_APP_ID=${env.NEXT_PUBLIC_FB_APP_ID} " +
-                        "--build-arg NEXT_PUBLIC_FB_MEASUREMENT_ID=${env.NEXT_PUBLIC_FB_MEASUREMENT_ID}"
+                        "--build-arg NEXT_PUBLIC_FB_MEASUREMENT_ID=${env.NEXT_PUBLIC_FB_MEASUREMENT_ID} ."
                     )
                 }
             }
