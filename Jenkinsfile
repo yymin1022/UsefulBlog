@@ -15,17 +15,8 @@ pipeline {
     stages {
         stage("Build Docker Image") {
             steps {
-                // 이 빌드 단계에서 젠킨스 Credential(Secret File)을 .env.local 파일로 바인딩하여 빌드에 전달합니다.
-                // 자격 증명 ID를 매개변수 ENV_CREDENTIAL_ID로부터 동적으로 가져옵니다.
-                withCredentials([file(credentialsId: "${params.ENV_CREDENTIAL_ID}", variable: 'ENV_FILE')]) {
-                    script {
-                        sh "cp \$ENV_FILE .env.local"
-                        docker.build(
-                            "${DOCKER_IMAGE_STORAGE}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}",
-                            "."
-                        )
-                        sh "rm -f .env.local"
-                    }
+                script {
+                    docker.build("${DOCKER_IMAGE_STORAGE}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}")
                 }
             }
         }
