@@ -19,7 +19,7 @@ const PostCardDesktop: React.FC<PostCardDesktopProps> = ({ post, postType }) => 
         }
     }
 
-    const imageSrc = `/api/getPostImage?postType=${postType}&postID=${postURL}&srcID=${thumbFile}`;
+    const imageSrc = `/getPostImage?postType=${postType}&postID=${postURL}&srcID=${thumbFile}`;
     const postLink = `/${postType}/${postID}`;
 
     return (
