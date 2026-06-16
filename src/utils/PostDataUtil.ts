@@ -29,8 +29,12 @@ function stripFrontMatter(content: string): string {
 }
 
 export const CDN_BASE_URL = "https://cdn.jsdelivr.net/gh/yymin1022/Blog_LR_Data@master";
-export const SITE_URL = process.env.URL_PUB || "https://dev-lr.com";
-export const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+export const SITE_URL = process.env.URL_PUB || "http://localhost:3000";
+
+const getBaseUrl = () => {
+    if (typeof window !== "undefined") return ""; // client-side 상대 경로 사용
+    return SITE_URL; // server-side 절대 경로 사용
+};
 
 export async function fetchWithTimeout(resource: string, options: RequestInit & { timeout?: number } = {}) {
     const { timeout = 8000 } = options;
@@ -66,7 +70,8 @@ export const getPostList = cache(async (postType: string) => {
     }
 
     try {
-        const response = await fetchWithTimeout(`${API_URL}/getPostList`, {
+        const url = `${getBaseUrl()}/getPostList`;
+        const response = await fetchWithTimeout(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -108,7 +113,8 @@ export const getPostData = cache(async (postType: string, postID: string) => {
     }
 
     try {
-        const response = await fetchWithTimeout(`${API_URL}/getPostData`, {
+        const url = `${getBaseUrl()}/getPostData`;
+        const response = await fetchWithTimeout(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -156,7 +162,8 @@ export const getPostImage = async (postType: string, postID: string, srcID: stri
     }
 
     try {
-        const response = await fetchWithTimeout(`${API_URL}/getPostImage`, {
+        const url = `${getBaseUrl()}/getPostImage`;
+        const response = await fetchWithTimeout(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
