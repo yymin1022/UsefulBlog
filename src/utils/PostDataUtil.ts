@@ -33,7 +33,7 @@ export const SITE_URL = process.env.URL_PUB || "http://localhost:3000";
 
 const getBaseUrl = () => {
     if (typeof window !== "undefined") return ""; // client-side 상대 경로 사용
-    return SITE_URL; // server-side 절대 경로 사용
+    return process.env.INTERNAL_API_URL || "http://localhost:3000"; // server-side 로컬 API 타겟
 };
 
 export async function fetchWithTimeout(resource: string, options: RequestInit & { timeout?: number } = {}) {
