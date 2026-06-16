@@ -208,7 +208,7 @@ const MDRender: React.FC<MDRenderProps> = ({ content, postURL, postType }) => {
 
         // ── Images ────────────────────────────────────────────────────────────
         img: ({ src, width, ...props }: any) => {
-            const imageSrc = `/api/getPostImage?postType=${postType}&postID=${postURL}&srcID=${src}`;
+            const imageSrc = `/getPostImage?postType=${postType}&postID=${postURL}&srcID=${src}`;
             return (
                 <div className="flex justify-center my-[24px]">
                     <img
