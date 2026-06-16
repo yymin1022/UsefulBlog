@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchWithTimeout, API_URL } from "@/utils/PostDataUtil";
+import { fetchWithTimeout, CDN_BASE_URL, PostData } from "@/utils/PostDataUtil";
 
 function isSafeInput(input: string | null): boolean {
     if (!input) return false;
@@ -28,23 +28,23 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        const response = await fetchWithTimeout(`${API_URL}/getPostList`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ postType })
-        });
-
-        if (!response.ok) {
-            return NextResponse.json({
-                RESULT_CODE: 100,
-                RESULT_MSG: `Backend error (HTTP ${response.status})`
-            });
+        // Fetch posts index from CDN
+        const indexUrl = `${CDN_BASE_URL}/posts.json`;
+        const indexResponse = await fetchWithTimeout(indexUrl, { next: { revalidate: 60 } });
+        if (!indexResponse.ok) {
+            throw new Error(`Failed to fetch posts index (HTTP ${indexResponse.status})`);
         }
+        const postsIndex = await indexResponse.json() as Record<string, PostData[]>;
+        const categoryPosts = postsIndex && Array.isArray(postsIndex[postType]) ? postsIndex[postType] : [];
 
-        const result = await response.json();
-        return NextResponse.json(result);
+        return NextResponse.json({
+            RESULT_CODE: 200,
+            RESULT_MSG: "Success",
+            RESULT_DATA: {
+                PostCount: categoryPosts.length,
+                PostList: categoryPosts
+            }
+        });
     } catch (error: any) {
         return NextResponse.json({
             RESULT_CODE: 100,

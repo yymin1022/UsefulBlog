@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchWithTimeout, API_URL } from "@/utils/PostDataUtil";
+import { fetchWithTimeout, CDN_BASE_URL, PostData } from "@/utils/PostDataUtil";
 
 function isSafeInput(input: string | null): boolean {
     if (!input) return false;
@@ -28,23 +28,53 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        const response = await fetchWithTimeout(`${API_URL}/getPostData`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ postType, postID })
-        });
+        // Fetch posts index from CDN
+        const indexUrl = `${CDN_BASE_URL}/posts.json`;
+        const indexResponse = await fetchWithTimeout(indexUrl, { next: { revalidate: 60 } });
+        if (!indexResponse.ok) {
+            throw new Error(`Failed to fetch posts index (HTTP ${indexResponse.status})`);
+        }
+        const postsIndex = await indexResponse.json() as Record<string, PostData[]>;
+        const categoryPosts = postsIndex && Array.isArray(postsIndex[postType]) ? postsIndex[postType] : [];
+        const post = categoryPosts.find((p) => p.postID === postID);
 
-        if (!response.ok) {
+        if (!post) {
             return NextResponse.json({
                 RESULT_CODE: 100,
-                RESULT_MSG: `Backend error (HTTP ${response.status})`
+                RESULT_MSG: "Post not found"
             });
         }
 
-        const result = await response.json();
-        return NextResponse.json(result);
+        const postURL = post.postURL || "";
+        if (!isSafeInput(postURL)) {
+            return NextResponse.json({
+                RESULT_CODE: 100,
+                RESULT_MSG: "Invalid post URL"
+            });
+        }
+
+        // Fetch original markdown content from CDN (with Front Matter intact)
+        const folderName = postType === "about" ? postID : postURL;
+        const postUrl = `${CDN_BASE_URL}/${postType}/${folderName}/post.md`;
+        const postResponse = await fetchWithTimeout(postUrl);
+        if (!postResponse.ok) {
+            throw new Error(`Failed to fetch post content (HTTP ${postResponse.status})`);
+        }
+
+        const rawContent = await postResponse.text();
+
+        return NextResponse.json({
+            RESULT_CODE: 200,
+            RESULT_MSG: "Success",
+            RESULT_DATA: {
+                PostContent: rawContent,
+                PostDate: post.postDate || "",
+                PostIsPinned: post.postIsPinned || false,
+                PostTag: post.postTag || [],
+                PostTitle: post.postTitle || "",
+                PostURL: postURL
+            }
+        });
     } catch (error: any) {
         return NextResponse.json({
             RESULT_CODE: 100,

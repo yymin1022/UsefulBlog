@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchWithTimeout, API_URL } from "@/utils/PostDataUtil";
+import { fetchWithTimeout, CDN_BASE_URL } from "@/utils/PostDataUtil";
 import path from "path";
 
 function isSafeInput(input: string | null): boolean {
@@ -38,23 +38,27 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        const response = await fetchWithTimeout(`${API_URL}/getPostImage`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ postType, postID, srcID })
-        });
+        // Fetch image directly from CDN
+        const baseUrl = CDN_BASE_URL;
+        const url = postType === "solving"
+            ? `${baseUrl}/${postType}/${srcID}`
+            : `${baseUrl}/${postType}/${postID}/${srcID}`;
 
+        const response = await fetchWithTimeout(url);
         if (!response.ok) {
-            return NextResponse.json({
-                RESULT_CODE: 100,
-                RESULT_MSG: `Backend error (HTTP ${response.status})`
-            });
+            throw new Error(`Failed to fetch image (HTTP ${response.status})`);
         }
 
-        const result = await response.json();
-        return NextResponse.json(result);
+        const arrayBuffer = await response.arrayBuffer();
+        const base64Data = Buffer.from(arrayBuffer).toString("base64");
+
+        return NextResponse.json({
+            RESULT_CODE: 200,
+            RESULT_MSG: "Success",
+            RESULT_DATA: {
+                ImageData: base64Data
+            }
+        });
     } catch (error: any) {
         return NextResponse.json({
             RESULT_CODE: 100,
@@ -84,27 +88,19 @@ export async function GET(req: NextRequest) {
             return new Response("Invalid file extension", { status: 400 });
         }
 
-        const response = await fetchWithTimeout(`${API_URL}/getPostImage`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ postType, postID, srcID })
-        });
+        const baseUrl = CDN_BASE_URL;
+        const url = postType === "solving"
+            ? `${baseUrl}/${postType}/${srcID}`
+            : `${baseUrl}/${postType}/${postID}/${srcID}`;
 
+        const response = await fetchWithTimeout(url);
         if (!response.ok) {
             const { origin } = new URL(req.url);
             return NextResponse.redirect(`${origin}/logo.png`, 307);
         }
 
-        const result = await response.json();
-        if (result.RESULT_CODE !== 200 || !result.RESULT_DATA?.ImageData) {
-            const { origin } = new URL(req.url);
-            return NextResponse.redirect(`${origin}/logo.png`, 307);
-        }
-
-        const base64Data = result.RESULT_DATA.ImageData;
-        const fileBuffer = Buffer.from(base64Data, "base64");
+        const arrayBuffer = await response.arrayBuffer();
+        const fileBuffer = Buffer.from(arrayBuffer);
 
         let contentType = "image/png";
         if (ext === ".jpg" || ext === ".jpeg") {
