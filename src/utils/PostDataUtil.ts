@@ -30,6 +30,7 @@ function stripFrontMatter(content: string): string {
 
 export const CDN_BASE_URL = "https://cdn.jsdelivr.net/gh/yymin1022/Blog_LR_Data@master";
 export const SITE_URL = process.env.URL_PUB || "https://dev-lr.com";
+export const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
 export async function fetchWithTimeout(resource: string, options: RequestInit & { timeout?: number } = {}) {
     const { timeout = 8000 } = options;
@@ -48,30 +49,13 @@ export async function fetchWithTimeout(resource: string, options: RequestInit & 
     }
 }
 
-// Fetch posts index mapping category slugs to PostData array
-const fetchPostsIndex = cache(async () => {
-    const url = `${CDN_BASE_URL}/posts.json`;
-    const response = await fetchWithTimeout(url, {
-        next: { revalidate: 60 } // Cache index for 60 seconds
-    });
-    if (!response.ok) {
-        throw new Error(`Failed to fetch posts index (HTTP ${response.status})`);
-    }
-    const data = await response.json();
-    if (!data || typeof data !== "object" || Array.isArray(data)) {
-        throw new Error("Invalid posts index structure: expected a JSON object");
-    }
-    return data as Record<string, PostData[]>;
-});
-
 export const getPostList = cache(async (postType: string) => {
-    const postList: PostData[] = [];
     const resultData = {
         RESULT_CODE: 0,
         RESULT_MSG: "",
         RESULT_DATA: {
             PostCount: 0,
-            PostList: postList
+            PostList: [] as PostData[]
         }
     };
 
@@ -82,19 +66,25 @@ export const getPostList = cache(async (postType: string) => {
     }
 
     try {
-        const postsIndex = await fetchPostsIndex();
-        const categoryPosts = postsIndex && Array.isArray(postsIndex[postType]) ? postsIndex[postType] : [];
-        
-        resultData.RESULT_DATA.PostList = categoryPosts;
-        resultData.RESULT_DATA.PostCount = categoryPosts.length;
-        resultData.RESULT_CODE = 200;
-        resultData.RESULT_MSG = "Success";
+        const response = await fetchWithTimeout(`${API_URL}/getPostList`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ postType }),
+            next: { revalidate: 60 }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch post list (HTTP ${response.status})`);
+        }
+
+        return await response.json();
     } catch (error: any) {
         resultData.RESULT_CODE = 100;
         resultData.RESULT_MSG = error.message || String(error);
+        return resultData;
     }
-
-    return resultData;
 });
 
 export const getPostData = cache(async (postType: string, postID: string) => {
@@ -118,48 +108,36 @@ export const getPostData = cache(async (postType: string, postID: string) => {
     }
 
     try {
-        const postsIndex = await fetchPostsIndex();
-        const categoryPosts = postsIndex && Array.isArray(postsIndex[postType]) ? postsIndex[postType] : [];
-        const post = categoryPosts.find((p) => p.postID === postID);
+        const response = await fetchWithTimeout(`${API_URL}/getPostData`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ postType, postID }),
+            next: { revalidate: 60 }
+        });
 
-        if (!post) {
-            resultData.RESULT_CODE = 100;
-            resultData.RESULT_MSG = "Post not found";
-            return resultData;
-        }
-
-        resultData.RESULT_DATA.PostDate = post.postDate || "";
-        resultData.RESULT_DATA.PostIsPinned = post.postIsPinned || false;
-        resultData.RESULT_DATA.PostTag = post.postTag || [];
-        resultData.RESULT_DATA.PostTitle = post.postTitle || "";
-        
-        const postURL = post.postURL || "";
-        resultData.RESULT_DATA.PostURL = postURL;
-
-        if (!isSafeInput(postURL)) {
-            resultData.RESULT_CODE = 100;
-            resultData.RESULT_MSG = "Invalid post URL";
-            return resultData;
-        }
-
-        // For 'about' posts, the folder name matches the postID
-        const folderName = postType === "about" ? postID : postURL;
-        const url = `${CDN_BASE_URL}/${postType}/${folderName}/post.md`;
-        const response = await fetchWithTimeout(url);
         if (!response.ok) {
-            throw new Error(`Failed to fetch post content (HTTP ${response.status})`);
+            throw new Error(`Failed to fetch post data (HTTP ${response.status})`);
         }
 
-        const rawContent = await response.text();
-        resultData.RESULT_DATA.PostContent = stripFrontMatter(rawContent);
-        resultData.RESULT_CODE = 200;
-        resultData.RESULT_MSG = "Success";
+        const result = await response.json();
+        if (result.RESULT_CODE === 200 && result.RESULT_DATA) {
+            if (result.RESULT_DATA.PostContent) {
+                result.RESULT_DATA.PostContent = stripFrontMatter(result.RESULT_DATA.PostContent);
+            }
+            // Ensure types match what frontend expects
+            result.RESULT_DATA.PostIsPinned = !!result.RESULT_DATA.PostIsPinned;
+            if (typeof result.RESULT_DATA.PostTag === "string") {
+                result.RESULT_DATA.PostTag = result.RESULT_DATA.PostTag ? result.RESULT_DATA.PostTag.split(",").map((t: string) => t.trim()) : [];
+            }
+        }
+        return result;
     } catch (error: any) {
         resultData.RESULT_CODE = 100;
         resultData.RESULT_MSG = error.message || String(error);
+        return resultData;
     }
-
-    return resultData;
 });
 
 export const getPostImage = async (postType: string, postID: string, srcID: string) => {
@@ -177,34 +155,24 @@ export const getPostImage = async (postType: string, postID: string, srcID: stri
         return resultData;
     }
 
-    const ALLOWED_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"];
-    const ext = path.extname(srcID).toLowerCase();
-    if (!ALLOWED_EXTENSIONS.includes(ext)) {
-        resultData.RESULT_CODE = 100;
-        resultData.RESULT_MSG = "Invalid file extension";
-        return resultData;
-    }
-
     try {
-        const baseUrl = CDN_BASE_URL;
-        const url = postType === "solving"
-            ? `${baseUrl}/${postType}/${srcID}`
-            : `${baseUrl}/${postType}/${postID}/${srcID}`;
+        const response = await fetchWithTimeout(`${API_URL}/getPostImage`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ postType, postID, srcID })
+        });
 
-        const response = await fetchWithTimeout(url);
         if (!response.ok) {
             throw new Error(`Failed to fetch image (HTTP ${response.status})`);
         }
 
-        const arrayBuffer = await response.arrayBuffer();
-        resultData.RESULT_DATA.ImageData = Buffer.from(arrayBuffer).toString("base64");
-
-        resultData.RESULT_CODE = 200;
-        resultData.RESULT_MSG = "Success";
+        return await response.json();
     } catch (error: any) {
         resultData.RESULT_CODE = 100;
         resultData.RESULT_MSG = error.message || String(error);
+        return resultData;
     }
-
-    return resultData;
 };
+
