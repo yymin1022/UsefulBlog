@@ -29,7 +29,10 @@ function stripFrontMatter(content: string): string {
 }
 
 export const CDN_BASE_URL = "https://cdn.jsdelivr.net/gh/yymin1022/Blog_LR_Data@master";
-export const SITE_URL = process.env.URL_PUB || "http://localhost:3000";
+export const SITE_URL = process.env.URL_PUB || 
+    (process.env.NODE_ENV === "production" 
+        ? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://dev-lr.com") 
+        : "http://localhost:3000");
 
 export async function fetchWithTimeout(resource: string, options: RequestInit & { timeout?: number } = {}) {
     const { timeout = 8000 } = options;
