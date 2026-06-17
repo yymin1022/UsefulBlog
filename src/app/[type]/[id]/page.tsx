@@ -32,13 +32,13 @@ export async function generateMetadata({
     let imageUrl = "/logo.png";
     if (type === "solving") {
         if (id.startsWith("boj")) {
-            imageUrl = "/api/getPostImage?postType=solving&postID=dummy&srcID=thumb_boj.png";
+            imageUrl = "/getPostImage?postType=solving&postID=dummy&srcID=thumb_boj.png";
         } else if (id.startsWith("programmers")) {
-            imageUrl = "/api/getPostImage?postType=solving&postID=dummy&srcID=thumb_programmers.png";
+            imageUrl = "/getPostImage?postType=solving&postID=dummy&srcID=thumb_programmers.png";
         }
     } else {
         const imageFolder = type === "about" ? id : PostURL;
-        imageUrl = `/api/getPostImage?postType=${type}&postID=${imageFolder}&srcID=post.png`;
+        imageUrl = `/getPostImage?postType=${type}&postID=${imageFolder}&srcID=post.png`;
     }
 
     return {

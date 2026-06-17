@@ -29,7 +29,10 @@ function stripFrontMatter(content: string): string {
 }
 
 export const CDN_BASE_URL = "https://cdn.jsdelivr.net/gh/yymin1022/Blog_LR_Data@master";
-export const SITE_URL = process.env.URL_PUB || "https://dev-lr.com";
+export const SITE_URL = process.env.URL_PUB || 
+    (process.env.NODE_ENV === "production" 
+        ? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://dev-lr.com") 
+        : "http://localhost:3000");
 
 export async function fetchWithTimeout(resource: string, options: RequestInit & { timeout?: number } = {}) {
     const { timeout = 8000 } = options;
@@ -65,13 +68,12 @@ const fetchPostsIndex = cache(async () => {
 });
 
 export const getPostList = cache(async (postType: string) => {
-    const postList: PostData[] = [];
     const resultData = {
         RESULT_CODE: 0,
         RESULT_MSG: "",
         RESULT_DATA: {
             PostCount: 0,
-            PostList: postList
+            PostList: [] as PostData[]
         }
     };
 
@@ -208,3 +210,4 @@ export const getPostImage = async (postType: string, postID: string, srcID: stri
 
     return resultData;
 };
+
