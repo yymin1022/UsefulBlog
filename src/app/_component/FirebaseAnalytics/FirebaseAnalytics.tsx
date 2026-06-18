@@ -44,6 +44,7 @@ export default function FirebaseAnalytics({ config }: { config: FirebaseConfig }
                     page_path: url,
                     page_location: window.location.href,
                     page_title: document.title,
+                    source: "web",
                 });
             } catch (error) {
                 console.error("Failed to log page_view event to Firebase Analytics:", error);
