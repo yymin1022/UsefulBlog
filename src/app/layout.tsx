@@ -5,6 +5,9 @@ import "./globals.css";
 import { SITE_URL } from "@/utils/PostDataUtil";
 import { Suspense } from "react";
 import FirebaseAnalytics from "@/app/_component/FirebaseAnalytics/FirebaseAnalytics";
+import Script from "next/script";
+import { ADSENSE_CLIENT_ID } from "@/utils/adsense";
+
 
 const nanumSquareL = localFont({
     src: "../fonts/NanumSquareL.otf",
@@ -83,6 +86,12 @@ export default function RootLayout({
             className={`${nanumSquareL.variable} ${nanumSquareR.variable} ${nanumSquareB.variable} ${pretendardL.variable} ${pretendardR.variable} ${pretendardB.variable}`}
         >
             <body>
+                <Script
+                    async
+                    src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
+                    crossOrigin="anonymous"
+                    strategy="afterInteractive"
+                />
                 <Suspense fallback={null}>
                     <FirebaseAnalytics config={firebaseConfig} />
                 </Suspense>

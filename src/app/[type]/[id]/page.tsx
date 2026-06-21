@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 import MDRender from "../_component/MDRender/MDRender";
 import Utterances from "../_component/Utterances/Utterances";
 import { getPostData, SITE_URL } from "@/utils/PostDataUtil";
+import AdSense from "@/app/_component/AdSense/AdSense";
+import { ADSENSE_SLOTS } from "@/utils/adsense";
+
 import { notFound } from "next/navigation";
 import PostDetailLoading from "./loading";
 
@@ -123,6 +126,11 @@ async function PostViewContent({ type, id }: { type: string; id: string }) {
             {/* Markdown Content */}
             <div className="w-full max-w-[720px]">
                 <MDRender content={PostContent} postURL={PostURL} postType={type} />
+            </div>
+
+            {/* AdSense Ad Banner */}
+            <div className="w-full max-w-[720px] mt-[40px]">
+                <AdSense adSlot={ADSENSE_SLOTS.POST_DETAIL} />
             </div>
 
             {/* Comments block */}
