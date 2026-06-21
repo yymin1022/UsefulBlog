@@ -6,6 +6,9 @@ import { redirect } from "next/navigation";
 import PostListLoading from "./loading";
 
 import { getCategoryNameEn } from "@/utils/CategoryUtil";
+import AdSense from "@/app/_component/AdSense/AdSense";
+import { ADSENSE_SLOTS } from "@/utils/adsense";
+
 
 export async function generateMetadata({
     params,
@@ -66,6 +69,9 @@ async function PostListContent({ type }: { type: string }) {
             {pinnedPosts.length > 0 && unpinnedPosts.length > 0 && (
                 <hr className="w-full border-0 bg-gradient-to-r from-transparent via-[#DDDDDD] to-transparent h-[1px] my-[16px]" />
             )}
+
+            {/* AdSense Ad Banner */}
+            <AdSense adSlot={ADSENSE_SLOTS.POST_LIST} className="my-[16px]" />
 
             {/* ── Regular Posts Grid ───────────────────────────── */}
             {unpinnedPosts.length > 0 && (
