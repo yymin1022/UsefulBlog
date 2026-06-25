@@ -28,7 +28,7 @@ function stripFrontMatter(content: string): string {
     return content;
 }
 
-export const CDN_BASE_URL = "https://cdn.jsdelivr.net/gh/yymin1022/Blog_LR_Data@master";
+export const CDN_BASE_URL = "https://cdn.jsdelivr.net/gh/yymin1022/UsefulBlog_Data@master";
 export const SITE_URL = process.env.URL_PUB || 
     (process.env.NODE_ENV === "production" 
         ? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://dev-lr.com") 
