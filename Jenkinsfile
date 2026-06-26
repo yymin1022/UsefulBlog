@@ -7,7 +7,7 @@ pipeline {
         GIT_INFO = "Branch(Version): ${GIT_BRANCH}\nLast Message: ${GIT_MESSAGE}\nAuthor: ${GIT_AUTHOR}\nCommit: ${GIT_COMMIT_SHORT}"
         
         DOCKERHUB_CREDENTIAL = "dockerhub-yymin1022"
-        DOCKER_IMAGE_NAME = "blog-lr"
+        DOCKER_IMAGE_NAME = "usefulblog"
         DOCKER_IMAGE_STORAGE = "yymin1022"
         DOCKER_IMAGE_TAG = "release${BUILD_NUMBER}"
     }
