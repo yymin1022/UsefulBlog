@@ -6,7 +6,7 @@ import { getPostData, SITE_URL } from "@/utils/PostDataUtil";
 import AdSense from "@/app/_component/AdSense/AdSense";
 import { ADSENSE_SLOTS } from "@/utils/adsense";
 
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import PostDetailLoading from "./loading";
 
 import { getCategoryNameKo } from "@/utils/CategoryUtil";
@@ -17,6 +17,16 @@ export async function generateMetadata({
     params: Promise<{ type: string; id: string }>;
 }): Promise<Metadata> {
     const { type, id } = await params;
+    if (type === "project") {
+        return {
+            title: "Project",
+            robots: {
+                index: false,
+                follow: false,
+            },
+        };
+    }
+
     const result = await getPostData(type, id);
 
 
@@ -76,6 +86,9 @@ export default async function PostViewPage({
     params: Promise<{ type: string; id: string }>;
 }) {
     const { type, id } = await params;
+    if (type === "project") {
+        redirect(`/s/${id}`);
+    }
 
     return (
         <Suspense fallback={<PostDetailLoading />}>
