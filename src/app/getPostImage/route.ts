@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
 import { getPostImage } from "@/utils/PostDataUtil";
+import { getRedirectTarget } from "@/utils/ShortUrlUtil";
+import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 
 export async function POST(req: NextRequest) {
@@ -37,6 +38,16 @@ export async function GET(req: NextRequest) {
 
         const result = await getPostImage(postType, postID, srcID);
         if (result.RESULT_CODE !== 200) {
+            if (postType === "project") {
+                const targetUrl = await getRedirectTarget(postID);
+                if (targetUrl) {
+                    const match = targetUrl.match(/github\.com\/([^/]+)/);
+                    if (match && match[1]) {
+                        return NextResponse.redirect(`https://github.com/${match[1]}.png`, 307);
+                    }
+                }
+            }
+
             const { origin } = new URL(req.url);
             return NextResponse.redirect(`${origin}/logo.png`, 307);
         }
