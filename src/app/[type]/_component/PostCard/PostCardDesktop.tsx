@@ -1,6 +1,7 @@
-import React from "react";
-import Link from "next/link";
 import { PostData } from "@/utils/PostDataUtil";
+import Link from "next/link";
+import React from "react";
+import { FaGithub } from "react-icons/fa6";
 
 interface PostCardDesktopProps {
     post: PostData;
@@ -9,6 +10,7 @@ interface PostCardDesktopProps {
 
 const PostCardDesktop: React.FC<PostCardDesktopProps> = ({ post, postType }) => {
     const { postDate, postID, postIsPinned, postTag, postTitle, postURL } = post;
+    const isProject = postType === "project";
 
     let thumbFile = "thumb.png";
     if (postType === "solving") {
@@ -20,10 +22,14 @@ const PostCardDesktop: React.FC<PostCardDesktopProps> = ({ post, postType }) => 
     }
 
     const imageSrc = `/getPostImage?postType=${postType}&postID=${postURL}&srcID=${thumbFile}`;
-    const postLink = `/${postType}/${postID}`;
+    const postLink = isProject ? `/s/${postURL}` : `/${postType}/${postID}`;
 
     return (
-        <Link href={postLink} className="block group w-full my-[10px]">
+        <Link 
+            href={postLink} 
+            {...(isProject ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            className="block group w-full my-[10px]"
+        >
             <div className="w-full h-[155px] flex flex-row bg-primary-blog_white border border-[#EEF2F6] hover:border-primary-blog_blue/10 rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.02),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_24px_rgba(22,78,171,0.06)] hover:-translate-y-[2px] transition-all duration-300 ease-out overflow-hidden relative">
                 
                 {/* Polaroid Inset Image Container */}
@@ -41,9 +47,14 @@ const PostCardDesktop: React.FC<PostCardDesktopProps> = ({ post, postType }) => 
                 {/* Text Container */}
                 <div className="flex-1 h-[155px] flex flex-col justify-between px-[20px] py-[18px] min-w-0">
                     <div className="flex flex-col text-left">
-                        <h2 className="text-[16px] sm:text-[17px] font-black text-primary-blog_blue leading-[1.3] line-clamp-2 transition-colors duration-300 group-hover:text-[#1D4ED8] font-nanum-b">
-                            {postTitle}
-                        </h2>
+                        <div className="flex items-start justify-between gap-[8px]">
+                            <h2 className="text-[16px] sm:text-[17px] font-black text-primary-blog_blue leading-[1.3] line-clamp-2 transition-colors duration-300 group-hover:text-[#1D4ED8] font-nanum-b">
+                                {postTitle}
+                            </h2>
+                            {isProject && (
+                                <FaGithub className="text-[#AAAAAA] group-hover:text-primary-blog_blue transition-colors flex-shrink-0 mt-[2px]" size="1.2em" />
+                            )}
+                        </div>
                         <p className="text-[13px] text-primary-blog_gray mt-[6px] font-nanum-r">
                             {postDate}
                         </p>

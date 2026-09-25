@@ -73,7 +73,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             const postsIndex: Record<string, PostIndexItem[]> = await response.json();
 
             postRoutes = Object.entries(postsIndex).flatMap(([category, posts]) => {
-                if (!Array.isArray(posts)) return [];
+                if (!Array.isArray(posts) || category === "project") return [];
 
                 return posts
                     .filter((post) => Boolean(post.postID))
