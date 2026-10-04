@@ -208,7 +208,10 @@ const MDRender: React.FC<MDRenderProps> = ({ content, postURL, postType }) => {
 
         // ── Images ────────────────────────────────────────────────────────────
         img: ({ src, width, ...props }: any) => {
-            const imageSrc = `/getPostImage?postType=${postType}&postID=${postURL}&srcID=${src}`;
+            const isExternal = typeof src === "string" && (src.startsWith("http://") || src.startsWith("https://"));
+            const imageSrc = isExternal
+                ? src
+                : `/getPostImage?postType=${postType}&postID=${postURL}&srcID=${src}`;
             return (
                 <div className="flex justify-center my-[24px]">
                     <img
