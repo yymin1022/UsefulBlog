@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { PostCategory } from "@/utils/CategoryUtil";
 import { CDN_BASE_URL, SITE_URL } from "@/utils/PostDataUtil";
 
 export const revalidate = 86400; // 24시간마다 백그라운드 갱신 (ISR)
@@ -43,19 +44,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 1.0,
         },
         {
-            url: `${siteUrl}/blog`,
+            url: `${siteUrl}/${PostCategory.BLOG}`,
             lastModified: new Date(),
             changeFrequency: "daily",
             priority: 0.8,
         },
         {
-            url: `${siteUrl}/project`,
+            url: `${siteUrl}/${PostCategory.PROJECT}`,
             lastModified: new Date(),
             changeFrequency: "daily",
             priority: 0.8,
         },
         {
-            url: `${siteUrl}/solving`,
+            url: `${siteUrl}/${PostCategory.SOLVING}`,
             lastModified: new Date(),
             changeFrequency: "daily",
             priority: 0.8,
@@ -73,12 +74,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             const postsIndex: Record<string, PostIndexItem[]> = await response.json();
 
             postRoutes = Object.entries(postsIndex).flatMap(([category, posts]) => {
-                if (!Array.isArray(posts) || category === "project") return [];
+                if (!Array.isArray(posts) || category === PostCategory.PROJECT) return [];
 
                 return posts
                     .filter((post) => Boolean(post.postID))
                     .map((post) => {
-                        const isAbout = category === "about";
+                        const isAbout = category === PostCategory.ABOUT;
                         const postDate = parsePostDate(post.postDate);
 
                         return {

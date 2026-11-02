@@ -1,3 +1,4 @@
+import { PostCategory } from "@/utils/CategoryUtil";
 import { PostData } from "@/utils/PostDataUtil";
 import Link from "next/link";
 import React from "react";
@@ -10,10 +11,10 @@ interface PostCardDesktopProps {
 
 const PostCardDesktop: React.FC<PostCardDesktopProps> = ({ post, postType }) => {
     const { postDate, postID, postIsPinned, postTag, postTitle, postURL } = post;
-    const isProject = postType === "project";
+    const isProject = postType === PostCategory.PROJECT;
 
     let thumbFile = "thumb.png";
-    if (postType === "solving") {
+    if (postType === PostCategory.SOLVING) {
         if (postIsPinned) {
             thumbFile = "thumb_boj.png";
         } else {

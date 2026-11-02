@@ -5,7 +5,7 @@ import { getPostList, PostData } from "@/utils/PostDataUtil";
 import { redirect } from "next/navigation";
 import PostListLoading from "./loading";
 
-import { getCategoryNameEn } from "@/utils/CategoryUtil";
+import { getCategoryNameEn, PostCategory } from "@/utils/CategoryUtil";
 import AdSense from "@/app/_component/AdSense/AdSense";
 import { ADSENSE_SLOTS } from "@/utils/adsense";
 
@@ -29,8 +29,8 @@ export default async function PostListPage({
     params: Promise<{ type: string }>;
 }) {
     const { type } = await params;
-    if (type === "about") {
-        redirect("/about/Useful");
+    if (type === PostCategory.ABOUT) {
+        redirect(`/${PostCategory.ABOUT}/Useful`);
     }
 
     return (

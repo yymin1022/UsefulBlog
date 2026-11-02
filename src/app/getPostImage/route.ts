@@ -1,3 +1,4 @@
+import { PostCategory } from "@/utils/CategoryUtil";
 import { getPostImage } from "@/utils/PostDataUtil";
 import { getRedirectTarget } from "@/utils/ShortUrlUtil";
 import { NextRequest, NextResponse } from "next/server";
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest) {
 
         const result = await getPostImage(postType, postID, srcID);
         if (result.RESULT_CODE !== 200) {
-            if (postType === "project") {
+            if (postType === PostCategory.PROJECT) {
                 const targetUrl = await getRedirectTarget(postID);
                 if (targetUrl) {
                     const match = targetUrl.match(/github\.com\/([^/]+)/);

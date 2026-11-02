@@ -9,7 +9,7 @@ import { ADSENSE_SLOTS } from "@/utils/adsense";
 import { notFound, redirect } from "next/navigation";
 import PostDetailLoading from "./loading";
 
-import { getCategoryNameKo } from "@/utils/CategoryUtil";
+import { getCategoryNameKo, PostCategory } from "@/utils/CategoryUtil";
 
 export async function generateMetadata({
     params,
@@ -17,7 +17,7 @@ export async function generateMetadata({
     params: Promise<{ type: string; id: string }>;
 }): Promise<Metadata> {
     const { type, id } = await params;
-    if (type === "project") {
+    if (type === PostCategory.PROJECT) {
         return {
             title: "Project",
             robots: {
@@ -43,14 +43,14 @@ export async function generateMetadata({
 
     // Determine dynamic OG image
     let imageUrl = "/logo.png";
-    if (type === "solving") {
+    if (type === PostCategory.SOLVING) {
         if (id.startsWith("boj")) {
-            imageUrl = "/getPostImage?postType=solving&postID=dummy&srcID=thumb_boj.png";
+            imageUrl = `/getPostImage?postType=${PostCategory.SOLVING}&postID=dummy&srcID=thumb_boj.png`;
         } else if (id.startsWith("programmers")) {
-            imageUrl = "/getPostImage?postType=solving&postID=dummy&srcID=thumb_programmers.png";
+            imageUrl = `/getPostImage?postType=${PostCategory.SOLVING}&postID=dummy&srcID=thumb_programmers.png`;
         }
     } else {
-        const imageFolder = type === "about" ? id : PostURL;
+        const imageFolder = type === PostCategory.ABOUT ? id : PostURL;
         imageUrl = `/getPostImage?postType=${type}&postID=${imageFolder}&srcID=post.png`;
     }
 
@@ -86,7 +86,7 @@ export default async function PostViewPage({
     params: Promise<{ type: string; id: string }>;
 }) {
     const { type, id } = await params;
-    if (type === "project") {
+    if (type === PostCategory.PROJECT) {
         redirect(`/s/${id}`);
     }
 
