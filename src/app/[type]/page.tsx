@@ -5,7 +5,7 @@ import { getPostList, PostData } from "@/utils/PostDataUtil";
 import { redirect } from "next/navigation";
 import PostListLoading from "./loading";
 
-import { getCategoryNameEn, isRobotSupported, PostCategory } from "@/utils/CategoryUtil";
+import { getCategoryNameEn, isAdSupported, isRobotSupported, PostCategory } from "@/utils/CategoryUtil";
 import AdSense from "@/app/_component/AdSense/AdSense";
 import { ADSENSE_SLOTS } from "@/utils/adsense";
 
@@ -75,7 +75,9 @@ async function PostListContent({ type }: { type: string }) {
             )}
 
             {/* AdSense Ad Banner */}
-            <AdSense adSlot={ADSENSE_SLOTS.POST_LIST} className="my-[16px]" />
+            {isAdSupported(type) && (
+                <AdSense adSlot={ADSENSE_SLOTS.POST_LIST} className="my-[16px]" />
+            )}
 
             {/* ── Regular Posts Grid ───────────────────────────── */}
             {unpinnedPosts.length > 0 && (

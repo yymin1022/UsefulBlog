@@ -22,6 +22,14 @@ export function getCategoryNameKo(slug: string): string {
     return CATEGORY_MAP[slug as PostCategory]?.ko || slug;
 }
 
+export function isAdSupported(slug: string): boolean {
+    return slug !== PostCategory.POLICY;
+}
+
+export function isCommentSupported(slug: string): boolean {
+    return slug !== PostCategory.POLICY;
+}
+
 export function isLinkCardSupported(slug: string): boolean {
     return slug !== PostCategory.ABOUT;
 }

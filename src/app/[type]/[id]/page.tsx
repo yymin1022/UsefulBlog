@@ -9,7 +9,7 @@ import { ADSENSE_SLOTS } from "@/utils/adsense";
 import { notFound, redirect } from "next/navigation";
 import PostDetailLoading from "./loading";
 
-import { getCategoryNameKo, isRobotSupported, PostCategory } from "@/utils/CategoryUtil";
+import { getCategoryNameKo, isAdSupported, isCommentSupported, isRobotSupported, PostCategory } from "@/utils/CategoryUtil";
 
 export async function generateMetadata({
     params,
@@ -146,14 +146,18 @@ async function PostViewContent({ type, id }: { type: string; id: string }) {
             </div>
 
             {/* AdSense Ad Banner */}
-            <div className="w-full max-w-[720px] mt-[40px]">
-                <AdSense adSlot={ADSENSE_SLOTS.POST_DETAIL} />
-            </div>
+            {isAdSupported(type) && (
+                <div className="w-full max-w-[720px] mt-[40px]">
+                    <AdSense adSlot={ADSENSE_SLOTS.POST_DETAIL} />
+                </div>
+            )}
 
             {/* Comments block */}
-            <div className="w-full max-w-[720px] mt-[60px] border-t border-[#EEEEEE] pt-[32px]">
-                <Utterances />
-            </div>
+            {isCommentSupported(type) && (
+                <div className="w-full max-w-[720px] mt-[60px] border-t border-[#EEEEEE] pt-[32px]">
+                    <Utterances />
+                </div>
+            )}
 
             {/* Footer */}
             <div className="h-[80px] w-full" />
