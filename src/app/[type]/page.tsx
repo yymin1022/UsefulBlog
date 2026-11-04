@@ -5,7 +5,7 @@ import { getPostList, PostData } from "@/utils/PostDataUtil";
 import { redirect } from "next/navigation";
 import PostListLoading from "./loading";
 
-import { getCategoryNameEn, PostCategory } from "@/utils/CategoryUtil";
+import { getCategoryNameEn, isRobotSupported, PostCategory } from "@/utils/CategoryUtil";
 import AdSense from "@/app/_component/AdSense/AdSense";
 import { ADSENSE_SLOTS } from "@/utils/adsense";
 
@@ -20,6 +20,10 @@ export async function generateMetadata({
     return {
         title: `${categoryName} - Useful Blog`,
         description: `Useful의 IT블로그: ${categoryName} 포스팅 목록`,
+        robots: {
+            index: isRobotSupported(type),
+            follow: isRobotSupported(type),
+        },
     };
 }
 

@@ -21,3 +21,15 @@ export function getCategoryNameEn(slug: string): string {
 export function getCategoryNameKo(slug: string): string {
     return CATEGORY_MAP[slug as PostCategory]?.ko || slug;
 }
+
+export function isLinkCardSupported(slug: string): boolean {
+    return slug !== PostCategory.ABOUT;
+}
+
+export function isRobotSupported(slug: string): boolean {
+    return slug !== PostCategory.PROJECT;
+}
+
+export function isSitemapSupported(slug: string): boolean {
+    return slug !== PostCategory.PROJECT;
+}

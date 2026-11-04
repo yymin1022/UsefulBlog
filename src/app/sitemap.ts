@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { PostCategory } from "@/utils/CategoryUtil";
+import { isSitemapSupported, PostCategory } from "@/utils/CategoryUtil";
 import { CDN_BASE_URL, SITE_URL } from "@/utils/PostDataUtil";
 
 export const revalidate = 86400; // 24시간마다 백그라운드 갱신 (ISR)
@@ -74,7 +74,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             const postsIndex: Record<string, PostIndexItem[]> = await response.json();
 
             postRoutes = Object.entries(postsIndex).flatMap(([category, posts]) => {
-                if (!Array.isArray(posts) || category === PostCategory.PROJECT) return [];
+                if (!Array.isArray(posts) || !isSitemapSupported(category)) return [];
 
                 return posts
                     .filter((post) => Boolean(post.postID))

@@ -9,7 +9,7 @@ import { ADSENSE_SLOTS } from "@/utils/adsense";
 import { notFound, redirect } from "next/navigation";
 import PostDetailLoading from "./loading";
 
-import { getCategoryNameKo, PostCategory } from "@/utils/CategoryUtil";
+import { getCategoryNameKo, isRobotSupported, PostCategory } from "@/utils/CategoryUtil";
 
 export async function generateMetadata({
     params,
@@ -21,8 +21,8 @@ export async function generateMetadata({
         return {
             title: "Project",
             robots: {
-                index: false,
-                follow: false,
+                index: isRobotSupported(type),
+                follow: isRobotSupported(type),
             },
         };
     }
@@ -57,6 +57,10 @@ export async function generateMetadata({
     return {
         title: PostTitle,
         description,
+        robots: {
+            index: isRobotSupported(type),
+            follow: isRobotSupported(type),
+        },
         openGraph: {
             title: `${PostTitle} - Useful Blog`,
             description,
