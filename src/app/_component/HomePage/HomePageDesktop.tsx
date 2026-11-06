@@ -1,3 +1,4 @@
+import { getCategoryNameEn, PostCategory } from "@/utils/CategoryUtil";
 import Link from "next/link";
 
 const HomePageDesktop = () => {
@@ -7,10 +8,10 @@ const HomePageDesktop = () => {
             <HomePageDesktopTitle isBlue={true} text={"1인개발자"} delay="100ms" />
             <HomePageDesktopTitle isBlue={false} text={"Useful입니다."} delay="200ms" />
             <div className="h-[30px] lg:h-[50px]" />
-            <HomePageDesktopNav path={"/blog"} text={"Blog"} delay="400ms" />
-            <HomePageDesktopNav path={"/project"} text={"Project"} delay="500ms" />
-            <HomePageDesktopNav path={"/solving"} text={"Problem Solving"} delay="600ms" />
-            <HomePageDesktopNav path={"/about"} text={"About Me"} delay="700ms" />
+            <HomePageDesktopNav path={`/${PostCategory.BLOG}`} text={getCategoryNameEn(PostCategory.BLOG)} delay="400ms" />
+            <HomePageDesktopNav path={`/${PostCategory.PROJECT}`} text={getCategoryNameEn(PostCategory.PROJECT)} delay="500ms" />
+            <HomePageDesktopNav path={`/${PostCategory.SOLVING}`} text={getCategoryNameEn(PostCategory.SOLVING)} delay="600ms" />
+            <HomePageDesktopNav path={`/${PostCategory.ABOUT}`} text={getCategoryNameEn(PostCategory.ABOUT)} delay="700ms" />
         </div>
     );
 }

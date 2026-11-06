@@ -5,7 +5,7 @@ import { getPostList, PostData } from "@/utils/PostDataUtil";
 import { redirect } from "next/navigation";
 import PostListLoading from "./loading";
 
-import { getCategoryNameEn } from "@/utils/CategoryUtil";
+import { getCategoryNameEn, isAdSupported, isRobotSupported, PostCategory } from "@/utils/CategoryUtil";
 import AdSense from "@/app/_component/AdSense/AdSense";
 import { ADSENSE_SLOTS } from "@/utils/adsense";
 
@@ -20,6 +20,10 @@ export async function generateMetadata({
     return {
         title: `${categoryName} - Useful Blog`,
         description: `Useful의 IT블로그: ${categoryName} 포스팅 목록`,
+        robots: {
+            index: isRobotSupported(type),
+            follow: isRobotSupported(type),
+        },
     };
 }
 
@@ -29,8 +33,8 @@ export default async function PostListPage({
     params: Promise<{ type: string }>;
 }) {
     const { type } = await params;
-    if (type === "about") {
-        redirect("/about/Useful");
+    if (type === PostCategory.ABOUT) {
+        redirect(`/${PostCategory.ABOUT}/Useful`);
     }
 
     return (
@@ -71,7 +75,9 @@ async function PostListContent({ type }: { type: string }) {
             )}
 
             {/* AdSense Ad Banner */}
-            <AdSense adSlot={ADSENSE_SLOTS.POST_LIST} className="my-[16px]" />
+            {isAdSupported(type) && (
+                <AdSense adSlot={ADSENSE_SLOTS.POST_LIST} className="my-[16px]" />
+            )}
 
             {/* ── Regular Posts Grid ───────────────────────────── */}
             {unpinnedPosts.length > 0 && (

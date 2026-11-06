@@ -1,5 +1,6 @@
 import path from "path";
 import { cache } from "react";
+import { PostCategory } from "@/utils/CategoryUtil";
 
 export interface PostData {
     postDate: string;
@@ -145,7 +146,7 @@ export const getPostData = cache(async (postType: string, postID: string) => {
         }
 
         // For 'about' posts, the folder name matches the postID
-        const folderName = postType === "about" ? postID : postURL;
+        const folderName = postType === PostCategory.ABOUT ? postID : postURL;
         const url = `${CDN_BASE_URL}/${postType}/${folderName}/post.md`;
         const response = await fetchWithTimeout(url);
         if (!response.ok) {
@@ -189,7 +190,7 @@ export const getPostImage = async (postType: string, postID: string, srcID: stri
 
     try {
         const baseUrl = CDN_BASE_URL;
-        const url = postType === "solving"
+        const url = postType === PostCategory.SOLVING
             ? `${baseUrl}/${postType}/${srcID}`
             : `${baseUrl}/${postType}/${postID}/${srcID}`;
 

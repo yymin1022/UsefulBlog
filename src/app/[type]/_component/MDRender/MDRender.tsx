@@ -1,3 +1,4 @@
+import { isLinkCardSupported } from "@/utils/CategoryUtil";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -189,7 +190,7 @@ const MDRender: React.FC<MDRenderProps> = ({ content, postURL, postType }) => {
 
         // ── Links ─────────────────────────────────────────────────────────────
         a: ({ children, href, ...props }: any) => {
-            if (postType !== "about") {
+            if (isLinkCardSupported(postType)) {
                 return <LinkCard href={href}>{children}</LinkCard>;
             } else {
                 return (

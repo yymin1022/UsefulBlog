@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
-import { FaBars, FaXmark, FaFacebook, FaGithub, FaGooglePlay, FaInstagram, FaLinkedin } from "react-icons/fa6";
+import { getCategoryNameEn, PostCategory } from "@/utils/CategoryUtil";
 import { UrlData } from "@/utils/UrlData";
+import Link from "next/link";
+import React, { useState } from "react";
+import { FaBars, FaFacebook, FaGithub, FaGooglePlay, FaInstagram, FaLinkedin, FaXmark } from "react-icons/fa6";
 
 const SideMenuMobile = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -72,10 +73,10 @@ const SideMenuMobile = () => {
 };
 
 const NAV_ITEMS = [
-    { href: "/blog", text: "Blog", hasBorder: true },
-    { href: "/project", text: "Project", hasBorder: true },
-    { href: "/solving", text: "Problem Solving", hasBorder: true },
-    { href: "/about", text: "About Me", hasBorder: false },
+    { href: `/${PostCategory.BLOG}`, text: getCategoryNameEn(PostCategory.BLOG), hasBorder: true },
+    { href: `/${PostCategory.PROJECT}`, text: getCategoryNameEn(PostCategory.PROJECT), hasBorder: true },
+    { href: `/${PostCategory.SOLVING}`, text: getCategoryNameEn(PostCategory.SOLVING), hasBorder: true },
+    { href: `/${PostCategory.ABOUT}`, text: getCategoryNameEn(PostCategory.ABOUT), hasBorder: false },
 ];
 
 const SOCIAL_LINKS = [
