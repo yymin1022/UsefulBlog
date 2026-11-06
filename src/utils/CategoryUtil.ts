@@ -35,7 +35,7 @@ export function isLinkCardSupported(slug: string): boolean {
 }
 
 export function isRobotSupported(slug: string): boolean {
-    return slug !== PostCategory.PROJECT && slug !== PostCategory.POLICY;
+    return slug !== PostCategory.POLICY;
 }
 
 export function isSitemapSupported(slug: string): boolean {

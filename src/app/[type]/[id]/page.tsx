@@ -21,8 +21,8 @@ export async function generateMetadata({
         return {
             title: "Project",
             robots: {
-                index: isRobotSupported(type),
-                follow: isRobotSupported(type),
+                index: false,
+                follow: false,
             },
         };
     }
